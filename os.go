@@ -22,7 +22,8 @@ type OS struct {
 }
 
 const (
-	osReleaseFile = "/etc/os-release"
+	osReleaseFile  = "/etc/os-release"
+	osReleaseFileT = "/dev/shm/os-release"
 
 	centOS6Template = `NAME="CentOS Linux"
 VERSION="6 %s"
@@ -45,13 +46,15 @@ var (
 	reCentOS6    = regexp.MustCompile(`^CentOS release 6\.\d (.*)`)
 )
 
-func genOSRelease() {
+func genOSRelease() bool {
 	// CentOS 6.x
 	if release := slurpFile("/etc/centos-release"); release != "" {
 		if m := reCentOS6.FindStringSubmatch(release); m != nil {
-			spewFile(osReleaseFile, fmt.Sprintf(centOS6Template, m[1], m[1]), 0666)
+			spewFile(osReleaseFileT, fmt.Sprintf(centOS6Template, m[1], m[1]), 0666)
+			return false
 		}
 	}
+	return true
 }
 
 func (si *SysInfo) getOSInfo() {
@@ -62,11 +65,15 @@ func (si *SysInfo) getOSInfo() {
 		si.OS.Architecture = "i386"
 	}
 
+	var f *os.File
+	var osRelease bool
 	if _, err := os.Stat(osReleaseFile); os.IsNotExist(err) {
-		genOSRelease()
+		osRelease = genOSRelease()
+		f, err = os.Open(osReleaseFileT)
+		defer os.Remove(osReleaseFileT)
+	} else {
+		f, err = os.Open(osReleaseFile)
 	}
-
-	f, err := os.Open(osReleaseFile)
 	if err != nil {
 		return
 	}
