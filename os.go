@@ -66,9 +66,8 @@ func (si *SysInfo) getOSInfo() {
 	}
 
 	var f *os.File
-	var osRelease bool
 	var err error
-	if _, err := os.Stat(osReleaseFile); os.IsNotExist(err) {
+	if _, err = os.Stat(osReleaseFile); os.IsNotExist(err) {
 		osRelease = genOSRelease()
 		f, err = os.Open(osReleaseFileT)
 		defer os.Remove(osReleaseFileT)
