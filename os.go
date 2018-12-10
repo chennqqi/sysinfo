@@ -43,7 +43,7 @@ var (
 	reVersionID  = regexp.MustCompile(`^VERSION_ID=(.*)$`)
 	reUbuntu     = regexp.MustCompile(`[\( ]([\d\.]+)`)
 	reCentOS     = regexp.MustCompile(`^CentOS( Linux)? release ([\d\.]+) `)
-	reCentOS6    = regexp.MustCompile(`^CentOS release 6\.\d (.*)`)
+	reCentOS6    = regexp.MustCompile(`^CentOS release 6\.[^\s]+ (.*)`)
 )
 
 func genOSRelease() bool {
@@ -70,7 +70,6 @@ func (si *SysInfo) getOSInfo() {
 	if _, err = os.Stat(osReleaseFile); os.IsNotExist(err) {
 		genOSRelease()
 		f, err = os.Open(osReleaseFileT)
-		defer os.Remove(osReleaseFileT)
 	} else {
 		f, err = os.Open(osReleaseFile)
 	}
@@ -78,6 +77,7 @@ func (si *SysInfo) getOSInfo() {
 		return
 	}
 	defer f.Close()
+	defer os.Remove(osReleaseFileT)
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {
