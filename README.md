@@ -17,24 +17,34 @@ libraries. It collects only "inventory type" information, things that don't chan
 package main
 
 import (
-        "encoding/json"
-        "fmt"
-        "log"
+	"encoding/json"
+	"fmt"
+	"log"
+	"os/user"
 
-        "github.com/zcalusic/sysinfo"
+	"github.com/zcalusic/sysinfo"
 )
 
 func main() {
-        var si sysinfo.SysInfo
+	current, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-        si.GetSysInfo()
+	if current.Uid != "0" {
+		log.Fatal("requires superuser privilege")
+	}
 
-        data, err := json.MarshalIndent(&si, "", "  ")
-        if err != nil {
-                log.Fatal(err)
-        }
+	var si sysinfo.SysInfo
 
-        fmt.Println(string(data))
+	si.GetSysInfo()
+
+	data, err := json.MarshalIndent(&si, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(data))
 }
 ```
 
@@ -43,18 +53,19 @@ func main() {
 I couldn't find any self-contained library that would provide set of data/features I needed. So another sysinfo was
 born.
 
-The purpose of the library is to collect only inventory info. No metrics like CPU usage or load average will be
-added. The rule of thumb is, if it's changing during the day, every day, it doesn't belong in the library.
+The purpose of the library is to collect only inventory info. No metrics like CPU usage or load average will be added.
+The rule of thumb is, if it's changing during the day, every day, it doesn't belong in the library.
 
-The library is mostly complete feature-wise, the challenges going forward will be to fully support more Linux
-distributions. So far the library has been tested to offer full functionality on the following distros:
+The library should work well on any Linux distribution. Here's just a small list of distributions on which the library
+has been successfully tested. If your favorite distro is not on the list, feel free to open an issue and report success.
 
+- [x] Fedora 28
 - [x] CentOS 6, 7
-- [x] Debian 7, 8, unstable
-- [x] Ubuntu 12.04, 14.04, 16.04
+- [x] Debian 7, 8, 9, unstable
+- [x] Ubuntu 12.04, 14.04, 16.04, 18.04
 
-OTOH, newer distributions should actually work out of the box (older ones are problematic) thanks to the newer kernels
-with more features and standardization efforts of the systemd team (think
+While older distributions can be a bit problematic, all newer should work out of the box thanks to modern kernels with
+more features and standardization efforts of the systemd team (think
 [/etc/os-release](http://0pointer.de/blog/projects/os-release) and stuff like that).
 
 ## Requirements
@@ -64,13 +75,11 @@ Sysinfo requires:
 - Linux kernel 2.6.23 or later (actually, this is what Go's run-time [requires](https://golang.org/doc/install))
 - access to /sys & /proc Linux virtual file systems
 - access to various files in /etc, /var, /run FS hierarchy
-- access to DMI system data via /dev/mem virtual device (read: superuser privileges)
+- access to DMI system data via /dev/mem virtual device (requires superuser privilege)
 
 Sysinfo doesn't require ANY other external utility on the target system, which is its primary strength, IMHO.
 
-Sysinfo is developed on Linux amd64 using Go 1.7, and only occasionally tested on Linux i386, but it should work equally
-well on both architectures. As it heavily depends on Linux internals, there are no plans to support other operating
-systems. But, I would like it to support all Linux architectures, eventually.
+It heavily depends on Linux internals, so there are no plans to support other operating systems.
 
 ## Installation
 
@@ -80,7 +89,7 @@ Just use go get.
 go get github.com/zcalusic/sysinfo
 ```
 
-There's also a very simple utility demonstrating sysinfo library capabilities. Start it (as the superuser) to get pretty
+There's also a very simple utility demonstrating sysinfo library capabilities. Start it (as superuser) to get pretty
 formatted JSON output of all the info that sysinfo library provides. Due to its simplicity, the source code of the
 utility also doubles down as an example of how to use the library.
 
@@ -169,20 +178,6 @@ go get github.com/zcalusic/sysinfo/cmd/sysinfo
   ]
 }
 ```
-
-## Todo
-
-- [x] Node info
-- [x] Hypervisor info
-- [ ] Container info
-- [x] OS info
-- [x] Kernel info
-- [x] Product info
-- [x] BIOS/Board/Chassis info
-- [x] CPU info
-- [x] Memory info
-- [x] Storage info
-- [x] Network info
 
 ## Contributors
 
