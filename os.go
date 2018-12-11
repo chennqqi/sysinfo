@@ -43,7 +43,7 @@ var (
 	reVersionID  = regexp.MustCompile(`^VERSION_ID=(.*)$`)
 	reUbuntu     = regexp.MustCompile(`[\( ]([\d\.]+)`)
 	reCentOS     = regexp.MustCompile(`^CentOS( Linux)? release ([\d\.]+) `)
-	reCentOS6    = regexp.MustCompile(`^CentOS release 6\.[^\s]+ (.*)`)
+	reCentOS6    = regexp.MustCompile(`^CentOS(?: Linux)? release 6\.[^\s]+ (.*)`)
 )
 
 func genOSRelease() bool {
