@@ -22,10 +22,10 @@ type OS struct {
 }
 
 const (
-	osReleaseFile  = "/etc/os-release"
-	osReleaseFileT = "/dev/shm/os-release"
-
-	centOS6Template = `NAME="CentOS Linux"
+	osReleaseFile    = "/etc/os-release"
+	osReleaseFileT   = "/dev/shm/os-release"
+	osReleaseCentOS5 = "/etc/redhat-release"
+	centOS6Template  = `NAME="CentOS Linux"
 VERSION="6 %s"
 ID="centos"
 ID_LIKE="rhel fedora"
@@ -33,6 +33,16 @@ VERSION_ID="6"
 PRETTY_NAME="CentOS Linux 6 %s"
 ANSI_COLOR="0;31"
 CPE_NAME="cpe:/o:centos:centos:6"
+HOME_URL="https://www.centos.org/"
+BUG_REPORT_URL="https://bugs.centos.org/"`
+	centOS5Template = `NAME="CentOS Linux"
+VERSION="5 %s"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="5"
+PRETTY_NAME="CentOS Linux 5 %s"
+ANSI_COLOR="0;31"
+CPE_NAME="cpe:/o:centos:centos:5"
 HOME_URL="https://www.centos.org/"
 BUG_REPORT_URL="https://bugs.centos.org/"`
 )
@@ -43,14 +53,19 @@ var (
 	reVersionID  = regexp.MustCompile(`^VERSION_ID=(.*)$`)
 	reUbuntu     = regexp.MustCompile(`[\( ]([\d\.]+)`)
 	reCentOS     = regexp.MustCompile(`^CentOS( Linux)? release ([\d\.]+) `)
-	reCentOS6    = regexp.MustCompile(`^CentOS(?: Linux)? release 6\.[^\s]+ (.*)`)
+	reCentOS6    = regexp.MustCompile(`^CentOS release 6\.\d (.*)`)
 )
 
 func genOSRelease() bool {
 	// CentOS 6.x
 	if release := slurpFile("/etc/centos-release"); release != "" {
-		if m := reCentOS6.FindStringSubmatch(release); m != nil {
+		if m := reCentOS.FindStringSubmatch(release); m != nil {
 			spewFile(osReleaseFileT, fmt.Sprintf(centOS6Template, m[1], m[1]), 0666)
+			return false
+		}
+	} else if release := slurpFile(osReleaseCentOS5); release != "" {
+		if m := reCentOS.FindStringSubmatch(release); m != nil {
+			spewFile(osReleaseFileT, fmt.Sprintf(centOS5Template, m[1], m[1]), 0666)
 			return false
 		}
 	}
