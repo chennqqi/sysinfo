@@ -118,5 +118,12 @@ func (si *SysInfo) getOSInfo() {
 				si.OS.Release = m[2]
 			}
 		}
+		if si.OS.Version == "5" {
+			if release := slurpFile("/etc/issue"); release != "" {
+				if m := reCentOS.FindStringSubmatch(release); m != nil {
+					si.OS.Release = m[2]
+				}
+			}
+		}
 	}
 }
