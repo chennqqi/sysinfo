@@ -1,1 +1,1 @@
-module github.com/zcalusic/sysinfo
+module github.com/chennqqi/sysinfo
