@@ -5,8 +5,8 @@
 package sysinfo
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -61,13 +61,13 @@ func getMaxSpeed(supp uint32) (speed uint) {
 func getSupported(name string) uint32 {
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, syscall.IPPROTO_IP)
 	dupFd := fd
-	log.Println("getSupported", name, fd, dupFd, err)
+	fmt.Println("getSupported", name, fd, dupFd, err)
 	if err != nil {
 		return 0
 	}
 	defer func(sfd int) {
 		err := syscall.Close(sfd)
-		log.Println("getSupported closed", fd, dupFd, sfd, err)
+		fmt.Println("getSupported closed", fd, dupFd, sfd, err)
 	}(dupFd)
 
 	// struct ethtool_cmd from /usr/include/linux/ethtool.h
