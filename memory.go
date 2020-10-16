@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -125,7 +126,11 @@ func getStructureTableAddress(f *os.File) (address int64, length int, err error)
 func getStructureTable() ([]byte, error) {
 	f, err := os.Open("/dev/mem")
 	if err != nil {
-		return nil, err
+		dmi, err := ioutil.ReadFile("/sys/firmware/dmi/tables/DMI")
+		if err != nil {
+			return nil, err
+		}
+		return dmi, nil
 	}
 	defer f.Close()
 
@@ -158,6 +163,7 @@ func (si *SysInfo) getMemoryInfo() {
 	}
 	defer syscall.Munmap(mem)
 
+	si.Memory.Size = 0
 	var memSizeAlt uint
 loop:
 	for p := 0; p < len(mem)-1; {
