@@ -65,10 +65,10 @@ func getSupported(name string) uint32 {
 	if err != nil {
 		return 0
 	}
-	defer func() {
-		err := syscall.Close(dupFd)
-		log.Println("getSupported closed", dupFd, err)
-	}()
+	defer func(sfd int) {
+		err := syscall.Close(sfd)
+		log.Println("getSupported closed", fd, dupFd, sfd, err)
+	}(dupFd)
 
 	// struct ethtool_cmd from /usr/include/linux/ethtool.h
 	var ethtool struct {
