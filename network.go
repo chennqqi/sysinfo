@@ -6,6 +6,7 @@ package sysinfo
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -59,6 +60,7 @@ func getMaxSpeed(supp uint32) (speed uint) {
 
 func getSupported(name string) uint32 {
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, syscall.IPPROTO_IP)
+	log.Println("getSupported", fd, err)
 	if err != nil {
 		return 0
 	}
