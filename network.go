@@ -61,13 +61,14 @@ func getMaxSpeed(supp uint32) (speed uint) {
 func getSupported(name string) uint32 {
 	fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_DGRAM, syscall.IPPROTO_IP)
 	dupFd := fd
-	fmt.Println("getSupported", name, fd, dupFd, err)
 	if err != nil {
 		return 0
 	}
 	defer func(sfd int) {
 		err := syscall.Close(sfd)
-		fmt.Println("getSupported closed", fd, dupFd, sfd, err)
+		if err != nil {
+			fmt.Println("getSupported closed", fd, dupFd, sfd, err)
+		}
 	}(dupFd)
 
 	// struct ethtool_cmd from /usr/include/linux/ethtool.h
